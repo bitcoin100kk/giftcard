@@ -275,18 +275,29 @@ function renderQR(targetCanvas, targetCtx, data, canvasW, canvasH, fgColor, quie
 // Render Code 128 Barcode onto a given context
 function renderBarcode(targetCanvas, targetCtx, data, canvasW, canvasH, fgColor, quietZone) {
     try {
+        const activeW = canvasW - (quietZone * 2);
+        const verticalPadding = Math.max(2, Math.floor(canvasH * 0.05));
+        const activeH = canvasH - (verticalPadding * 2);
+
+        // Dynamically scale single bar width to match canvas resolution (prevents blurring)
+        const barWidth = Math.max(2, Math.floor(activeW / 250));
+
         const tempCanvas = document.createElement("canvas");
         window.JsBarcode(tempCanvas, data, {
             format: "CODE128",
             displayValue: false,
             margin: 0,
+            width: barWidth,
             lineColor: fgColor,
             background: "rgba(0,0,0,0)"
         });
 
-        const activeW = canvasW - (quietZone * 2);
-        const verticalPadding = Math.max(2, Math.floor(canvasH * 0.05));
-        const activeH = canvasH - (verticalPadding * 2);
+        // Turn off image smoothing for pixel-perfect sharp barcode edges
+        const oldSmoothing = targetCtx.imageSmoothingEnabled;
+        targetCtx.imageSmoothingEnabled = false;
+        targetCtx.mozImageSmoothingEnabled = false;
+        targetCtx.webkitImageSmoothingEnabled = false;
+        targetCtx.msImageSmoothingEnabled = false;
 
         targetCtx.drawImage(
             tempCanvas,
@@ -296,12 +307,19 @@ function renderBarcode(targetCanvas, targetCtx, data, canvasW, canvasH, fgColor,
             activeW,
             activeH
         );
+
+        // Restore image smoothing settings
+        targetCtx.imageSmoothingEnabled = oldSmoothing;
+        targetCtx.mozImageSmoothingEnabled = oldSmoothing;
+        targetCtx.webkitImageSmoothingEnabled = oldSmoothing;
+        targetCtx.msImageSmoothingEnabled = oldSmoothing;
     } catch (e) {
         targetCtx.fillStyle = "red";
         targetCtx.font = "12px monospace";
         targetCtx.fillText("Barcode Error: " + e.message, 10, canvasH / 2);
     }
 }
+
 
 // Generate SVG Code
 function generateSVGString() {
