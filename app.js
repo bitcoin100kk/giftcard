@@ -38,6 +38,38 @@ const SUBTEXT_HEIGHT = 45;
 // Wallet Data Store
 let savedCards = [];
 
+// Screen Wake Lock API state
+let wakeLock = null;
+
+async function requestWakeLock() {
+    if ('wakeLock' in navigator) {
+        try {
+            wakeLock = await navigator.wakeLock.request('screen');
+        } catch (err) {
+            console.warn(`Wake Lock failed: ${err.name}, ${err.message}`);
+        }
+    }
+}
+
+function releaseWakeLock() {
+    if (wakeLock !== null) {
+        wakeLock.release()
+            .then(() => {
+                wakeLock = null;
+            })
+            .catch(err => {
+                console.error("Failed to release Wake Lock", err);
+            });
+    }
+}
+
+// Auto re-acquire wake lock if browser tab goes background and returns
+document.addEventListener('visibilitychange', async () => {
+    if (document.visibilityState === 'visible' && document.body.classList.contains("focus-active")) {
+        await requestWakeLock();
+    }
+});
+
 // Helper: Format Card Numbers in blocks of 4 characters (alphanumeric supported)
 function formatCardNumber(str) {
     if (!str) return "";
@@ -405,7 +437,7 @@ function downloadSVG() {
 }
 
 // Focus Mode: Show high-contrast fullscreen code on white background
-function enterFocusMode() {
+async function enterFocusMode() {
     const data = cardNumberInput.value.trim().replace(/\s+/g, "");
     const pin = pinInput.value.trim();
     const type = codeTypeInput.value;
@@ -433,12 +465,17 @@ function enterFocusMode() {
 
     focusOverlay.style.display = "flex";
     document.body.classList.add("focus-active");
+
+    // Request wake lock to prevent screen dimming/locking
+    await requestWakeLock();
 }
 
 function exitFocusMode() {
     focusOverlay.style.display = "none";
     document.body.classList.remove("focus-active");
+    releaseWakeLock();
 }
+
 
 // Print layouts (single print)
 function printCard() {
