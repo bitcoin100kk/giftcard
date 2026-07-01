@@ -135,7 +135,7 @@ function drawCardSubtext(targetCtx, cardStr, pinStr, canvasW, canvasH, fgColor) 
 
 // Core drawing engine
 function drawCode() {
-    const data = cardNumberInput.value.trim();
+    const data = cardNumberInput.value.trim().replace(/\s+/g, "");
     const pin = pinInput.value.trim();
     const type = codeTypeInput.value;
     const width = parseInt(canvasWidth.value) || 190;
@@ -272,7 +272,7 @@ function renderBarcode(targetCanvas, targetCtx, data, canvasW, canvasH, fgColor,
 
 // Generate SVG Code
 function generateSVGString() {
-    const data = cardNumberInput.value.trim();
+    const data = cardNumberInput.value.trim().replace(/\s+/g, "");
     const pin = pinInput.value.trim();
     const type = codeTypeInput.value;
     const width = parseInt(canvasWidth.value) || 190;
@@ -406,7 +406,7 @@ function downloadSVG() {
 
 // Focus Mode: Show high-contrast fullscreen code on white background
 function enterFocusMode() {
-    const data = cardNumberInput.value.trim();
+    const data = cardNumberInput.value.trim().replace(/\s+/g, "");
     const pin = pinInput.value.trim();
     const type = codeTypeInput.value;
     
@@ -442,7 +442,7 @@ function exitFocusMode() {
 
 // Print layouts (single print)
 function printCard() {
-    const data = cardNumberInput.value.trim();
+    const data = cardNumberInput.value.trim().replace(/\s+/g, "");
     const pin = pinInput.value.trim();
     if (!data) return;
 
