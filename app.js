@@ -94,19 +94,42 @@ function updateContrastBadge() {
 // Draw the Card Subtext onto a given canvas context
 function drawCardSubtext(targetCtx, cardStr, pinStr, canvasW, canvasH, fgColor) {
     const formattedCard = formatCardNumber(cardStr);
-    const displayText = pinStr ? `${formattedCard}   PIN: ${pinStr}` : formattedCard;
-
     targetCtx.fillStyle = fgColor;
     targetCtx.textAlign = "center";
     targetCtx.textBaseline = "middle";
 
-    // Set font based on card size
-    const fontSize = canvasW < 250 ? 10 : 12;
-    targetCtx.font = `600 ${fontSize}px 'Fira Code', monospace`;
-    
-    // Draw in the middle of the reserved bottom container
-    const yPos = canvasH - (SUBTEXT_HEIGHT / 2);
-    targetCtx.fillText(displayText, canvasW / 2, yPos);
+    let fontSize = canvasW < 250 ? 10 : 12;
+
+    if (pinStr) {
+        // Draw two lines (Card Number on line 1, PIN on line 2)
+        // Draw Card Number
+        let cardFontSize = fontSize;
+        targetCtx.font = `600 ${cardFontSize}px 'Fira Code', monospace`;
+        while (targetCtx.measureText(formattedCard).width > (canvasW - 10) && cardFontSize > 6) {
+            cardFontSize -= 0.5;
+            targetCtx.font = `600 ${cardFontSize}px 'Fira Code', monospace`;
+        }
+        targetCtx.fillText(formattedCard, canvasW / 2, canvasH - 28);
+
+        // Draw PIN
+        const pinText = `PIN: ${pinStr}`;
+        let pinFontSize = fontSize;
+        targetCtx.font = `600 ${pinFontSize}px 'Fira Code', monospace`;
+        while (targetCtx.measureText(pinText).width > (canvasW - 10) && pinFontSize > 6) {
+            pinFontSize -= 0.5;
+            targetCtx.font = `600 ${pinFontSize}px 'Fira Code', monospace`;
+        }
+        targetCtx.fillText(pinText, canvasW / 2, canvasH - 12);
+    } else {
+        // Draw one line (Card Number only)
+        let cardFontSize = fontSize;
+        targetCtx.font = `600 ${cardFontSize}px 'Fira Code', monospace`;
+        while (targetCtx.measureText(formattedCard).width > (canvasW - 10) && cardFontSize > 6) {
+            cardFontSize -= 0.5;
+            targetCtx.font = `600 ${cardFontSize}px 'Fira Code', monospace`;
+        }
+        targetCtx.fillText(formattedCard, canvasW / 2, canvasH - (SUBTEXT_HEIGHT / 2));
+    }
 }
 
 // Core drawing engine
@@ -329,13 +352,22 @@ function generateSVGString() {
         innerContent += `</g>`;
     }
 
-    // Add text tag to SVG
+    // Add text tags to SVG
     const formattedCard = formatCardNumber(data);
-    const displayText = pin ? `${formattedCard}   PIN: ${pin}` : formattedCard;
-    const yPos = height - (SUBTEXT_HEIGHT / 2);
+    let textElements = "";
     const fontSize = width < 250 ? 10 : 12;
-    
-    innerContent += `<text x="${width / 2}" y="${yPos}" fill="${fgColor}" font-family="Fira Code, monospace" font-weight="600" font-size="${fontSize}" text-anchor="middle" dominant-baseline="central">${displayText}</text>`;
+
+    if (pin) {
+        textElements = `
+    <text x="${width / 2}" y="${height - 28}" fill="${fgColor}" font-family="Fira Code, monospace" font-weight="600" font-size="${fontSize}" text-anchor="middle" dominant-baseline="central">${formattedCard}</text>
+    <text x="${width / 2}" y="${height - 12}" fill="${fgColor}" font-family="Fira Code, monospace" font-weight="600" font-size="${fontSize}" text-anchor="middle" dominant-baseline="central">PIN: ${pin}</text>
+        `;
+    } else {
+        textElements = `
+    <text x="${width / 2}" y="${height - (SUBTEXT_HEIGHT / 2)}" fill="${fgColor}" font-family="Fira Code, monospace" font-weight="600" font-size="${fontSize}" text-anchor="middle" dominant-baseline="central">${formattedCard}</text>
+        `;
+    }
+    innerContent += textElements;
 
     return `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
@@ -510,12 +542,37 @@ function printCard() {
                 // Draw text
                 const formattedCard = "${formatCardNumber(data)}";
                 const pin = "${pin}";
-                const text = pin ? formattedCard + "   PIN: " + pin : formattedCard;
                 ctx.fillStyle = "${fgColor}";
-                ctx.font = "600 ${width < 250 ? 10 : 12}px 'Fira Code', monospace";
-                ctx.textAlign = "center";
-                ctx.textBaseline = "middle";
-                ctx.fillText(text, ${width / 2}, ${height - SUBTEXT_HEIGHT / 2});
+                let fontSize = ${width} < 250 ? 10 : 12;
+                
+                if (pin) {
+                    // Draw Card Number
+                    let cardFontSize = fontSize;
+                    ctx.font = "600 " + cardFontSize + "px 'Fira Code', monospace";
+                    while (ctx.measureText(formattedCard).width > (${width} - 10) && cardFontSize > 6) {
+                        cardFontSize -= 0.5;
+                        ctx.font = "600 " + cardFontSize + "px 'Fira Code', monospace";
+                    }
+                    ctx.fillText(formattedCard, ${width / 2}, ${height} - 28);
+
+                    // Draw PIN
+                    const pinText = "PIN: " + pin;
+                    let pinFontSize = fontSize;
+                    ctx.font = "600 " + pinFontSize + "px 'Fira Code', monospace";
+                    while (ctx.measureText(pinText).width > (${width} - 10) && pinFontSize > 6) {
+                        pinFontSize -= 0.5;
+                        ctx.font = "600 " + pinFontSize + "px 'Fira Code', monospace";
+                    }
+                    ctx.fillText(pinText, ${width / 2}, ${height} - 12);
+                } else {
+                    let cardFontSize = fontSize;
+                    ctx.font = "600 " + cardFontSize + "px 'Fira Code', monospace";
+                    while (ctx.measureText(formattedCard).width > (${width} - 10) && cardFontSize > 6) {
+                        cardFontSize -= 0.5;
+                        ctx.font = "600 " + cardFontSize + "px 'Fira Code', monospace";
+                    }
+                    ctx.fillText(formattedCard, ${width / 2}, ${height} - (${SUBTEXT_HEIGHT / 2}));
+                }
             </script>
         </body>
         </html>
