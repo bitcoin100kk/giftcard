@@ -813,7 +813,7 @@ function loadCardIntoGenerator(card) {
                 borderValue.textContent = "4 px";
             } else {
                 canvasWidth.value = 375;
-                canvasHeight.value = 65;
+                canvasHeight.value = 95;
                 borderSlider.min = 0;
                 borderSlider.max = 50;
                 borderSlider.value = 10;
@@ -950,7 +950,7 @@ pills.forEach(pill => {
             borderValue.textContent = "4 px";
         } else {
             canvasWidth.value = 375;
-            canvasHeight.value = 65;
+            canvasHeight.value = 95;
             borderSlider.min = 0;
             borderSlider.max = 50;
             borderSlider.value = 10;
