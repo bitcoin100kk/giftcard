@@ -176,6 +176,133 @@ canvas {
     gap: 15px;
 }
 
+/* --- Wallet Panel List --- */
+.saved-cards-panel {
+    gap: 12px;
+}
+
+.saved-cards-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 230px;
+    overflow-y: auto;
+    padding-right: 2px;
+}
+
+/* Custom Scrollbar for Wallet list */
+.saved-cards-list::-webkit-scrollbar {
+    width: 4px;
+}
+
+.saved-cards-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.saved-cards-list::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 2px;
+}
+
+.empty-wallet-text {
+    font-size: 13px;
+    color: var(--text-hint);
+    text-align: center;
+    padding: 20px 0;
+    font-style: italic;
+}
+
+/* Wallet Item Card */
+.wallet-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    border-radius: 12px;
+    padding: 12px 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    touch-action: manipulation;
+}
+
+.wallet-item:hover {
+    background-color: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.08);
+}
+
+.wallet-item:active {
+    transform: scale(0.98);
+}
+
+.wallet-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+}
+
+.wallet-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.wallet-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.wallet-type-tag {
+    font-size: 9px;
+    font-weight: 800;
+    text-transform: uppercase;
+    background-color: var(--accent-blue-glow);
+    color: var(--accent-blue);
+    padding: 1px 5px;
+    border-radius: 3px;
+}
+
+.wallet-numbers {
+    font-family: 'Fira Code', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.wallet-pin {
+    color: var(--accent-purple);
+    font-weight: 600;
+    margin-left: 8px;
+}
+
+/* Delete Card Button */
+.delete-card-btn {
+    background: none;
+    border: none;
+    outline: none;
+    color: var(--text-hint);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    transition: all 0.15s ease;
+    touch-action: manipulation;
+}
+
+.delete-card-btn:hover {
+    color: var(--danger);
+    background-color: rgba(239, 68, 68, 0.1);
+}
+
+.delete-card-btn:active {
+    transform: scale(0.85);
+}
+
 /* Format Toggle Pill Switcher */
 .format-toggle-container {
     display: flex;
@@ -297,6 +424,12 @@ select:focus {
     flex-direction: column;
     gap: 15px;
     border-top: 1px solid rgba(255,255,255,0.03);
+}
+
+.divider {
+    border: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    margin: 5px 0;
 }
 
 /* Custom Checkbox */
@@ -468,7 +601,7 @@ input[type="range"]::-webkit-slider-thumb {
 }
 
 .btn-secondary:active {
-    background-color: rgba(255,255,255,0.05);
+    background-color: rgba(255, 255, 255, 0.05);
 }
 
 .btn-accent {

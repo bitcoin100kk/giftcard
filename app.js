@@ -1,4 +1,5 @@
 // State and DOM elements
+const storeNameInput = document.getElementById("store-name-input");
 const cardNumberInput = document.getElementById("card-number-input");
 const pinInput = document.getElementById("pin-input");
 const codeTypeInput = document.getElementById("code-type");
@@ -17,6 +18,12 @@ const printBtn = document.getElementById("print-btn");
 const canvas = document.getElementById("qr-canvas");
 const ctx = canvas.getContext("2d");
 
+// Wallet DOM Elements
+const saveCardBtn = document.getElementById("save-card-btn");
+const savedCardsList = document.getElementById("saved-cards-list");
+const exportBtn = document.getElementById("export-btn");
+const importBtn = document.getElementById("import-btn");
+
 // Focus Mode Elements
 const focusOverlay = document.getElementById("focus-overlay");
 const focusCanvas = document.getElementById("focus-canvas");
@@ -27,6 +34,9 @@ const viewportTrigger = document.getElementById("viewport-trigger");
 
 // Subtext space reservation in pixels
 const SUBTEXT_HEIGHT = 45;
+
+// Wallet Data Store
+let savedCards = [];
 
 // Helper: Format Card Numbers in blocks of 4 digits
 function formatCardNumber(str) {
@@ -369,33 +379,25 @@ function enterFocusMode() {
     
     if (!data) return;
 
-    // Expand screen dimensions
     const viewportW = window.innerWidth;
     const viewportH = window.innerHeight;
-    
-    // Choose size fitting 85% of screen width and 60% of screen height
     const size = Math.floor(Math.min(viewportW * 0.85, viewportH * 0.6));
     
-    // Set high-fidelity canvas size
     focusCanvas.width = size;
     focusCanvas.height = size + SUBTEXT_HEIGHT;
 
-    // Draw high-contrast scanning base
     focusCtx.fillStyle = "#FFFFFF";
     focusCtx.fillRect(0, 0, focusCanvas.width, focusCanvas.height);
 
     const codeMaxH = size;
-    // Always render high contrast black on white for iOS focus mode scanability
     if (type === "qr") {
         renderQR(focusCanvas, focusCtx, data, size, codeMaxH, "#000000", 2);
     } else {
         renderBarcode(focusCanvas, focusCtx, data, size, codeMaxH, "#000000", 15);
     }
 
-    // Add subtext (black color)
     drawCardSubtext(focusCtx, data, pin, size, focusCanvas.height, "#000000");
 
-    // Activate overlay styles
     focusOverlay.style.display = "flex";
     document.body.classList.add("focus-active");
 }
@@ -405,7 +407,7 @@ function exitFocusMode() {
     document.body.classList.remove("focus-active");
 }
 
-// Print layouts (single list print)
+// Print layouts (single print)
 function printCard() {
     const data = cardNumberInput.value.trim();
     const pin = pinInput.value.trim();
@@ -521,7 +523,244 @@ function printCard() {
     printWindow.document.close();
 }
 
-// Bind pills interaction
+// --- Wallet Store Management ---
+
+// Load Wallet from LocalStorage
+function loadWallet() {
+    try {
+        const stored = localStorage.getItem("coregen_wallet");
+        if (stored) {
+            savedCards = JSON.parse(stored);
+        } else {
+            // Seed a helpful sample card on first visit
+            savedCards = [
+                {
+                    id: "sample-starbucks",
+                    store: "Sample Card (Tap Me)",
+                    card: "6048871859201027974",
+                    pin: "1234",
+                    type: "qr"
+                }
+            ];
+            saveWalletToStorage();
+        }
+    } catch (e) {
+        console.error("Failed to load wallet", e);
+        savedCards = [];
+    }
+    renderWalletList();
+}
+
+function saveWalletToStorage() {
+    localStorage.setItem("coregen_wallet", JSON.stringify(savedCards));
+}
+
+// Render dynamic cards list
+function renderWalletList() {
+    savedCardsList.innerHTML = "";
+
+    if (savedCards.length === 0) {
+        savedCardsList.innerHTML = `<div class="empty-wallet-text">Your wallet is empty</div>`;
+        return;
+    }
+
+    savedCards.forEach(card => {
+        const cardItem = document.createElement("div");
+        cardItem.className = "wallet-item";
+        cardItem.title = "Tap to load card";
+        
+        // Load details when clicked
+        cardItem.addEventListener("click", () => {
+            loadCardIntoGenerator(card);
+        });
+
+        const info = document.createElement("div");
+        info.className = "wallet-info";
+
+        const header = document.createElement("div");
+        header.className = "wallet-header";
+
+        const title = document.createElement("span");
+        title.className = "wallet-title";
+        title.textContent = card.store;
+        header.appendChild(title);
+
+        const typeTag = document.createElement("span");
+        typeTag.className = "wallet-type-tag";
+        typeTag.textContent = card.type === "qr" ? "QR" : "1D";
+        header.appendChild(typeTag);
+        info.appendChild(header);
+
+        const numbers = document.createElement("div");
+        numbers.className = "wallet-numbers";
+        numbers.textContent = formatCardNumber(card.card);
+        
+        if (card.pin) {
+            const pinSpan = document.createElement("span");
+            pinSpan.className = "wallet-pin";
+            pinSpan.textContent = `PIN: ${card.pin}`;
+            numbers.appendChild(pinSpan);
+        }
+        info.appendChild(numbers);
+        cardItem.appendChild(info);
+
+        // Delete Button
+        const delBtn = document.createElement("button");
+        delBtn.className = "delete-card-btn";
+        delBtn.innerHTML = "✕";
+        delBtn.title = "Delete card";
+        delBtn.addEventListener("click", (e) => {
+            e.stopPropagation(); // Avoid loading the card when deleting it
+            deleteCard(card.id);
+        });
+        cardItem.appendChild(delBtn);
+
+        savedCardsList.appendChild(cardItem);
+    });
+}
+
+// Populate Generator with Card details
+function loadCardIntoGenerator(card) {
+    storeNameInput.value = card.store;
+    cardNumberInput.value = card.card;
+    pinInput.value = card.pin || "";
+    
+    // Set type input & toggler pills
+    codeTypeInput.value = card.type;
+    pills.forEach(p => {
+        const type = p.getAttribute("data-type");
+        if (type === card.type) {
+            p.classList.add("active");
+            
+            // Reapply defaults
+            if (type === "qr") {
+                canvasWidth.value = 190;
+                canvasHeight.value = 160;
+                borderSlider.min = 0;
+                borderSlider.max = 10;
+                borderSlider.value = 4;
+                borderValue.textContent = "4 px";
+            } else {
+                canvasWidth.value = 375;
+                canvasHeight.value = 65;
+                borderSlider.min = 0;
+                borderSlider.max = 50;
+                borderSlider.value = 10;
+                borderValue.textContent = "10 px";
+            }
+        } else {
+            p.classList.remove("active");
+        }
+    });
+
+    updateContrastBadge();
+    drawCode();
+}
+
+// Save Current Fields to Wallet
+function saveCurrentCard() {
+    const cardNo = cardNumberInput.value.trim();
+    const pin = pinInput.value.trim();
+    let store = storeNameInput.value.trim();
+
+    if (!cardNo) {
+        alert("Please enter a card number first.");
+        return;
+    }
+
+    if (!store) {
+        store = "Unnamed Card";
+    }
+
+    const type = codeTypeInput.value;
+
+    // Check if card number already exists in wallet
+    const existingIndex = savedCards.findIndex(c => c.card === cardNo);
+    
+    if (existingIndex > -1) {
+        // Update existing card
+        savedCards[existingIndex].store = store;
+        savedCards[existingIndex].pin = pin;
+        savedCards[existingIndex].type = type;
+    } else {
+        // Add new card
+        const newCard = {
+            id: Date.now().toString(),
+            store: store,
+            card: cardNo,
+            pin: pin,
+            type: type
+        };
+        savedCards.push(newCard);
+    }
+
+    saveWalletToStorage();
+    renderWalletList();
+
+    // Clear store name input for the next entry
+    storeNameInput.value = "";
+}
+
+// Delete Card from Wallet
+function deleteCard(id) {
+    if (!confirm("Are you sure you want to delete this card?")) return;
+    
+    savedCards = savedCards.filter(c => c.id !== id);
+    saveWalletToStorage();
+    renderWalletList();
+}
+
+// Wallet Data Backup & Restore Functions
+function exportWallet() {
+    const dataStr = JSON.stringify(savedCards);
+    
+    // Attempt clipboard write
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(dataStr).then(() => {
+            alert("Success! Your wallet data backup has been COPIED to your clipboard. Paste it somewhere safe.");
+        }).catch(err => {
+            prompt("Fallback: Copy your backup JSON string below:", dataStr);
+        });
+    } else {
+        prompt("Copy your backup JSON string below:", dataStr);
+    }
+}
+
+function importWallet() {
+    const backupStr = prompt("Paste your wallet backup JSON string here:");
+    if (!backupStr) return;
+
+    try {
+        const parsed = JSON.parse(backupStr.trim());
+        if (Array.isArray(parsed)) {
+            // Basic validation
+            const valid = parsed.every(item => item.store && item.card && item.type);
+            if (valid) {
+                if (confirm(`Do you want to overwrite your wallet with these ${parsed.length} cards?`)) {
+                    savedCards = parsed;
+                    saveWalletToStorage();
+                    renderWalletList();
+                    
+                    // Auto-load first card
+                    if (savedCards.length > 0) {
+                        loadCardIntoGenerator(savedCards[0]);
+                    }
+                    alert("Wallet restored successfully!");
+                }
+            } else {
+                alert("Invalid backup format: missing required card details.");
+            }
+        } else {
+            alert("Invalid backup: data must be a list of cards.");
+        }
+    } catch (e) {
+        alert("Failed to restore: invalid JSON string. " + e.message);
+    }
+}
+
+// --- Bind Controls & Listeners ---
+
+// Format Pills segmented controls
 const pills = document.querySelectorAll(".format-pill");
 pills.forEach(pill => {
     pill.addEventListener("click", () => {
@@ -531,7 +770,6 @@ pills.forEach(pill => {
         const type = pill.getAttribute("data-type");
         codeTypeInput.value = type;
 
-        // Auto swap sizing presets
         if (type === "qr") {
             canvasWidth.value = 190;
             canvasHeight.value = 160;
@@ -564,12 +802,18 @@ pills.forEach(pill => {
     });
 });
 
+// Save Button
+saveCardBtn.addEventListener("click", saveCurrentCard);
+
+// Backup buttons
+exportBtn.addEventListener("click", exportWallet);
+importBtn.addEventListener("click", importWallet);
+
 // Focus mode triggers
 focusToggleBtn.addEventListener("click", enterFocusMode);
 viewportTrigger.addEventListener("click", enterFocusMode);
 closeFocusBtn.addEventListener("click", exitFocusMode);
 focusOverlay.addEventListener("click", (e) => {
-    // Only close if tapping background, not the canvas container itself
     if (e.target === focusOverlay || e.target.classList.contains("focus-hint")) {
         exitFocusMode();
     }
@@ -588,8 +832,15 @@ printBtn.addEventListener("click", printCard);
 
 // Initial Run
 const runInit = () => {
-    updateContrastBadge();
-    drawCode();
+    loadWallet(); // Load local storage
+    
+    // Auto-load first card from list if available on load
+    if (savedCards.length > 0) {
+        loadCardIntoGenerator(savedCards[0]);
+    } else {
+        updateContrastBadge();
+        drawCode();
+    }
 };
 
 if (document.readyState === "loading") {

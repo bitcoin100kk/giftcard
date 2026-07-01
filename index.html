@@ -46,6 +46,15 @@
 
         <!-- Simple Menu Configuration -->
         <main class="controls-panel">
+            
+            <!-- Saved Cards List (Primary Wallet View) -->
+            <section class="panel saved-cards-panel">
+                <h2 class="panel-title">My Wallet</h2>
+                <div id="saved-cards-list" class="saved-cards-list">
+                    <!-- Dynamic cards list -->
+                </div>
+            </section>
+
             <!-- Main Inputs -->
             <section class="panel main-inputs">
                 <!-- Pill Toggle for Format (QR Default) -->
@@ -56,8 +65,13 @@
                 </div>
 
                 <div class="form-group">
+                    <label for="store-name-input">Store / Card Name</label>
+                    <input type="text" id="store-name-input" placeholder="e.g. Starbucks" autocomplete="off">
+                </div>
+
+                <div class="form-group">
                     <label for="card-number-input">Card Number</label>
-                    <input type="text" id="card-number-input" placeholder="6048871859201027974" value="6048871859201027974" autocomplete="off" novalidate>
+                    <input type="text" id="card-number-input" placeholder="6048871859201027974" autocomplete="off" novalidate>
                 </div>
 
                 <div class="form-row">
@@ -66,6 +80,10 @@
                         <input type="text" id="pin-input" placeholder="1234" autocomplete="off" novalidate>
                     </div>
                 </div>
+
+                <button id="save-card-btn" class="btn btn-primary" style="margin-top: 5px;">
+                    <span class="btn-icon">💾</span> Save to Wallet
+                </button>
             </section>
 
             <!-- Collapsible Advanced Settings -->
@@ -126,19 +144,30 @@
                             </div>
                         </div>
                     </div>
+
+                    <hr class="divider">
+
+                    <!-- Backup & Restore section -->
+                    <div class="form-group">
+                        <label>Wallet Data Backup</label>
+                        <div class="form-row">
+                            <button id="export-btn" class="btn btn-secondary" style="flex: 1; padding: 10px;">Export</button>
+                            <button id="import-btn" class="btn btn-secondary" style="flex: 1; padding: 10px;">Import</button>
+                        </div>
+                    </div>
                 </div>
             </details>
 
             <!-- Actions Grid -->
             <section class="action-grid">
-                <button id="download-png-btn" class="btn btn-primary">
-                    <span class="btn-icon">💾</span> Download PNG
+                <button id="download-png-btn" class="btn btn-secondary">
+                    <span class="btn-icon">🖼️</span> PNG
                 </button>
                 <button id="download-svg-btn" class="btn btn-secondary">
-                    <span class="btn-icon">📐</span> Download SVG
+                    <span class="btn-icon">📐</span> SVG
                 </button>
                 <button id="print-btn" class="btn btn-accent">
-                    <span class="btn-icon">🖨️</span> Open Print Sheet
+                    <span class="btn-icon">🖨️</span> Print Card
                 </button>
             </section>
         </main>
