@@ -589,17 +589,13 @@ function loadWallet() {
         const stored = localStorage.getItem("coregen_wallet");
         if (stored) {
             savedCards = JSON.parse(stored);
+            // Auto-clean the old default sample card to start fresh for the user
+            if (savedCards.length === 1 && savedCards[0].id === "sample-starbucks") {
+                savedCards = [];
+                saveWalletToStorage();
+            }
         } else {
-            // Seed a helpful sample card on first visit
-            savedCards = [
-                {
-                    id: "sample-starbucks",
-                    store: "Sample Card (Tap Me)",
-                    card: "6048871859201027974",
-                    pin: "1234",
-                    type: "qr"
-                }
-            ];
+            savedCards = [];
             saveWalletToStorage();
         }
     } catch (e) {
@@ -608,6 +604,7 @@ function loadWallet() {
     }
     renderWalletList();
 }
+
 
 function saveWalletToStorage() {
     localStorage.setItem("coregen_wallet", JSON.stringify(savedCards));
@@ -618,9 +615,10 @@ function renderWalletList() {
     savedCardsList.innerHTML = "";
 
     if (savedCards.length === 0) {
-        savedCardsList.innerHTML = `<div class="empty-wallet-text">Your wallet is empty</div>`;
+        savedCardsList.innerHTML = `<div class="empty-wallet-text">Your wallet is empty. Add a card below to get started!</div>`;
         return;
     }
+
 
     savedCards.forEach(card => {
         const cardItem = document.createElement("div");
