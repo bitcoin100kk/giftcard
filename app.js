@@ -285,13 +285,14 @@ function renderBarcode(targetCanvas, targetCtx, data, canvasW, canvasH, fgColor,
         });
 
         const activeW = canvasW - (quietZone * 2);
-        const activeH = canvasH - (quietZone * 2);
+        const verticalPadding = Math.max(2, Math.floor(canvasH * 0.05));
+        const activeH = canvasH - (verticalPadding * 2);
 
         targetCtx.drawImage(
             tempCanvas,
             0, 0, tempCanvas.width, tempCanvas.height,
             quietZone,
-            quietZone,
+            verticalPadding,
             activeW,
             activeH
         );
@@ -373,12 +374,13 @@ function generateSVGString() {
         const rawH = tempSvg.viewBox.baseVal.height || 100;
 
         const activeW = width - (quietZone * 2);
-        const activeH = codeMaxH - (quietZone * 2);
+        const verticalPadding = Math.max(2, Math.floor(codeMaxH * 0.05));
+        const activeH = codeMaxH - (verticalPadding * 2);
 
         const scaleX = activeW / rawW;
         const scaleY = activeH / rawH;
 
-        innerContent = `<g transform="translate(${quietZone}, ${quietZone}) scale(${scaleX}, ${scaleY})">`;
+        innerContent = `<g transform="translate(${quietZone}, ${verticalPadding}) scale(${scaleX}, ${scaleY})">`;
         paths.forEach(el => {
             innerContent += el.outerHTML;
         });
