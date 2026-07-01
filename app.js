@@ -410,18 +410,93 @@ function generateSVGString() {
 </svg>`;
 }
 
-// Trigger PNG Download
+// Trigger PNG Download (High-Resolution Export)
 function downloadPNG() {
-    const data = cardNumberInput.value.trim();
+    const data = cardNumberInput.value.trim().replace(/\s+/g, "");
+    const pin = pinInput.value.trim();
     if (!data) return;
-    
-    canvas.toBlob((blob) => {
+
+    const type = codeTypeInput.value;
+    const width = parseInt(canvasWidth.value) || 190;
+    const height = parseInt(canvasHeight.value) || 160;
+    const bgColor = bgColorInput.value;
+    const fgColor = fgColorInput.value;
+    const quietZone = parseInt(borderSlider.value) || 4;
+
+    // Use a scale multiplier of 6 for high-definition export
+    const scale = 6;
+    const hiResW = width * scale;
+    const hiResH = height * scale;
+    const hiResQuietZone = quietZone * scale;
+    const hiResSubtextH = SUBTEXT_HEIGHT * scale;
+
+    const hiResCanvas = document.createElement("canvas");
+    hiResCanvas.width = hiResW;
+    hiResCanvas.height = hiResH;
+
+    const hiResCtx = hiResCanvas.getContext("2d");
+
+    // Clear and draw background
+    hiResCtx.fillStyle = bgColor;
+    hiResCtx.fillRect(0, 0, hiResW, hiResH);
+
+    // Determine target box for code itself (reserve bottom height for subtext)
+    const codeMaxH = hiResH - hiResSubtextH;
+
+    if (type === "qr") {
+        renderQR(hiResCanvas, hiResCtx, data, hiResW, codeMaxH, fgColor, hiResQuietZone);
+    } else {
+        renderBarcode(hiResCanvas, hiResCtx, data, hiResW, codeMaxH, fgColor, hiResQuietZone);
+    }
+
+    // Add human-readable subtext scaled by the multiplier
+    const formattedCard = formatCardNumber(data);
+    hiResCtx.fillStyle = fgColor;
+    hiResCtx.textAlign = "center";
+    hiResCtx.textBaseline = "middle";
+
+    // Set font based on card size
+    let fontSize = (hiResW < 250 * scale ? 14 : 20) * scale;
+
+    if (pin) {
+        // Draw Card Number
+        let cardFontSize = fontSize;
+        hiResCtx.font = `600 ${cardFontSize}px 'Fira Code', monospace`;
+        while (hiResCtx.measureText(formattedCard).width > (hiResW - 10 * scale) && cardFontSize > 6 * scale) {
+            cardFontSize -= 0.5 * scale;
+            hiResCtx.font = `600 ${cardFontSize}px 'Fira Code', monospace`;
+        }
+        hiResCtx.fillText(formattedCard, hiResW / 2, hiResH - 28 * scale);
+
+        // Draw PIN
+        const pinText = `PIN: ${pin}`;
+        let pinFontSize = fontSize;
+        hiResCtx.font = `600 ${pinFontSize}px 'Fira Code', monospace`;
+        while (hiResCtx.measureText(pinText).width > (hiResW - 10 * scale) && pinFontSize > 6 * scale) {
+            pinFontSize -= 0.5 * scale;
+            hiResCtx.font = `600 ${pinFontSize}px 'Fira Code', monospace`;
+        }
+        hiResCtx.fillText(pinText, hiResW / 2, hiResH - 12 * scale);
+    } else {
+        // Draw one line (Card Number only)
+        let cardFontSize = fontSize;
+        hiResCtx.font = `600 ${cardFontSize}px 'Fira Code', monospace`;
+        while (hiResCtx.measureText(formattedCard).width > (hiResW - 10 * scale) && cardFontSize > 6 * scale) {
+            cardFontSize -= 0.5 * scale;
+            hiResCtx.font = `600 ${cardFontSize}px 'Fira Code', monospace`;
+        }
+        hiResCtx.fillText(formattedCard, hiResW / 2, hiResH - (hiResSubtextH / 2));
+    }
+
+    // Trigger download
+    hiResCanvas.toBlob((blob) => {
         const link = document.createElement("a");
         link.download = `card_${data}.png`;
         link.href = URL.createObjectURL(blob);
         link.click();
     }, "image/png");
 }
+
 
 // Trigger SVG Download
 function downloadSVG() {
