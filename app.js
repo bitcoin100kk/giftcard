@@ -99,7 +99,7 @@ function drawCardSubtext(targetCtx, cardStr, pinStr, canvasW, canvasH, fgColor) 
     targetCtx.textAlign = "center";
     targetCtx.textBaseline = "middle";
 
-    let fontSize = canvasW < 250 ? 10 : 12;
+    let fontSize = canvasW < 250 ? 14 : 20;
 
     if (pinStr) {
         // Draw two lines (Card Number on line 1, PIN on line 2)
@@ -356,7 +356,7 @@ function generateSVGString() {
     // Add text tags to SVG
     const formattedCard = formatCardNumber(data);
     let textElements = "";
-    const fontSize = width < 250 ? 10 : 12;
+    const fontSize = width < 250 ? 14 : 20;
 
     if (pin) {
         textElements = `
@@ -544,7 +544,7 @@ function printCard() {
                 const formattedCard = "${formatCardNumber(data)}";
                 const pin = "${pin}";
                 ctx.fillStyle = "${fgColor}";
-                let fontSize = ${width} < 250 ? 10 : 12;
+                let fontSize = ${width} < 250 ? 14 : 20;
                 
                 if (pin) {
                     // Draw Card Number
