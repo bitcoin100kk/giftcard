@@ -444,10 +444,11 @@ function downloadPNG() {
     const codeMaxH = hiResH - hiResSubtextH;
 
     if (type === "qr") {
-        renderQR(hiResCanvas, hiResCtx, data, hiResW, codeMaxH, fgColor, hiResQuietZone);
+        renderQR(hiResCanvas, hiResCtx, data, hiResW, codeMaxH, fgColor, quietZone);
     } else {
         renderBarcode(hiResCanvas, hiResCtx, data, hiResW, codeMaxH, fgColor, hiResQuietZone);
     }
+
 
     // Add human-readable subtext scaled by the multiplier
     const formattedCard = formatCardNumber(data);
