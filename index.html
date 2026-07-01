@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>CoreGen</title>
+    
+    <!-- iOS / PWA Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="CoreGen">
+    <link rel="apple-touch-icon" href="icon.png">
+    <link rel="manifest" href="manifest.json">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="glass-background"></div>
+    
+    <!-- Focus Mode Screen Overlay -->
+    <div id="focus-overlay" class="focus-overlay-screen">
+        <button id="close-focus-btn" class="close-focus-btn" aria-label="Exit Focus Mode">✕</button>
+        <div class="focus-canvas-container">
+            <canvas id="focus-canvas"></canvas>
+        </div>
+        <p class="focus-hint">Tap anywhere to exit fullscreen</p>
+    </div>
+
+    <div class="app-container">
+        <!-- Centerpiece Viewport (Top Focus) -->
+        <section class="viewport-card">
+            <div class="viewport" id="viewport-trigger" title="Tap to expand fullscreen">
+                <div class="canvas-container">
+                    <canvas id="qr-canvas"></canvas>
+                </div>
+            </div>
+            
+            <div class="badge-row">
+                <div id="contrast-badge" class="badge">Contrast Ratio: --:1</div>
+                <button id="focus-toggle-btn" class="focus-badge-btn">🔍 Focus Mode</button>
+            </div>
+        </section>
+
+        <!-- Simple Menu Configuration -->
+        <main class="controls-panel">
+            <!-- Main Inputs -->
+            <section class="panel main-inputs">
+                <!-- Pill Toggle for Format (QR Default) -->
+                <div class="format-toggle-container">
+                    <button type="button" class="format-pill active" data-type="qr">QR Code</button>
+                    <button type="button" class="format-pill" data-type="barcode">Barcode</button>
+                    <input type="hidden" id="code-type" value="qr">
+                </div>
+
+                <div class="form-group">
+                    <label for="card-number-input">Card Number</label>
+                    <input type="text" id="card-number-input" placeholder="6048871859201027974" value="6048871859201027974" autocomplete="off" novalidate>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="pin-input">PIN (Optional)</label>
+                        <input type="text" id="pin-input" placeholder="1234" autocomplete="off" novalidate>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Collapsible Advanced Settings -->
+            <details class="advanced-settings-accordion">
+                <summary class="accordion-summary">Sizing & Styling Settings <span>✦</span></summary>
+                <div class="accordion-content">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="canvas-width">Width (px)</label>
+                            <input type="number" id="canvas-width" value="190">
+                        </div>
+                        <div class="form-group">
+                            <label for="canvas-height">Height (px)</label>
+                            <input type="number" id="canvas-height" value="160">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="slider-label-row">
+                            <label for="border-slider">Quiet Zone Border</label>
+                            <span id="border-value" class="slider-value">4 px</span>
+                        </div>
+                        <input type="range" id="border-slider" min="0" max="10" value="4">
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="qr-ecc">QR Error Correction</label>
+                            <select id="qr-ecc">
+                                <option value="L">Low (7%)</option>
+                                <option value="M">Medium (15%)</option>
+                                <option value="Q" selected>Quartile (25%)</option>
+                                <option value="H">High (30%)</option>
+                            </select>
+                        </div>
+                        <div class="form-group checkbox-group">
+                            <label class="checkbox-container">
+                                <input type="checkbox" id="square-lock" checked>
+                                <span class="checkmark"></span>
+                                Lock Square Ratio
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="fg-color">Code Color</label>
+                            <div class="color-picker-wrapper">
+                                <input type="color" id="fg-color" value="#000000">
+                                <span class="color-hex">#000000</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="bg-color">Background Color</label>
+                            <div class="color-picker-wrapper">
+                                <input type="color" id="bg-color" value="#FFFFFF">
+                                <span class="color-hex">#FFFFFF</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </details>
+
+            <!-- Actions Grid -->
+            <section class="action-grid">
+                <button id="download-png-btn" class="btn btn-primary">
+                    <span class="btn-icon">💾</span> Download PNG
+                </button>
+                <button id="download-svg-btn" class="btn btn-secondary">
+                    <span class="btn-icon">📐</span> Download SVG
+                </button>
+                <button id="print-btn" class="btn btn-accent">
+                    <span class="btn-icon">🖨️</span> Open Print Sheet
+                </button>
+            </section>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="qrcodegen.js"></script>
+    <script src="JsBarcode.all.min.js"></script>
+    <script src="app.js"></script>
+
+    <!-- Color picker hex updater helper -->
+    <script>
+        document.getElementById("fg-color").addEventListener("input", (e) => {
+            e.target.nextElementSibling.textContent = e.target.value.toUpperCase();
+        });
+        document.getElementById("bg-color").addEventListener("input", (e) => {
+            e.target.nextElementSibling.textContent = e.target.value.toUpperCase();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+{
+  "short_name": "CoreGen",
+  "name": "CoreGen Barcode Studio",
+  "icons": [
+    {
+      "src": "icon.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "index.html",
+  "background_color": "#0a0c14",
+  "theme_color": "#0a0c14",
+  "display": "standalone",
+  "orientation": "portrait"
+}

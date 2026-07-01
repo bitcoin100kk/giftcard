@@ -1,0 +1,5 @@
+# Scratch and temp files
+scratch/
+.DS_Store
+Thumbs.db
+*.original.md

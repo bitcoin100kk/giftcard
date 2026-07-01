@@ -1,0 +1,569 @@
+/* --- iOS & Glassmorphic Custom Theme --- */
+:root {
+    --bg-base: hsl(224, 25%, 8%);
+    --panel-bg: rgba(18, 22, 33, 0.65);
+    --panel-border: rgba(255, 255, 255, 0.08);
+    --input-bg: rgba(10, 12, 20, 0.5);
+    --input-focus-border: hsl(265, 85%, 64%);
+    
+    /* Colors */
+    --accent-purple: hsl(265, 85%, 64%);
+    --accent-purple-glow: rgba(138, 43, 226, 0.25);
+    --accent-blue: hsl(200, 90%, 55%);
+    --accent-blue-glow: rgba(0, 191, 255, 0.2);
+    
+    --text-main: hsl(210, 25%, 98%);
+    --text-muted: hsl(215, 16%, 72%);
+    --text-hint: hsl(215, 12%, 50%);
+
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+}
+
+/* --- Global Settings --- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent; /* Disable tap blue highlights in iOS Safari */
+}
+
+body {
+    background-color: var(--bg-base);
+    color: var(--text-main);
+    font-family: 'Outfit', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    position: relative;
+    padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom) 0; /* Respect safe area boundaries */
+}
+
+.glass-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -1;
+    background: 
+        radial-gradient(circle at 50% 15%, var(--accent-purple-glow) 0%, transparent 45%),
+        radial-gradient(circle at 50% 85%, var(--accent-blue-glow) 0%, transparent 45%);
+    filter: blur(80px);
+}
+
+.app-container {
+    width: 100%;
+    max-width: 480px; /* Locked to clean mobile layout */
+    padding: 20px 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* --- Section 1: Centerpiece Viewport (Top Focus) --- */
+.viewport-card {
+    background-color: var(--panel-bg);
+    border: 1px solid var(--panel-border);
+    border-radius: 20px;
+    padding: 25px 20px;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.viewport {
+    width: 100%;
+    min-height: 200px;
+    background-color: var(--input-bg);
+    border: 1px solid var(--panel-border);
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+.canvas-container {
+    background-color: white;
+    padding: 12px;
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+canvas {
+    display: block;
+    max-width: 100%;
+    height: auto;
+}
+
+.badge-row {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+.badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 20px;
+    border: 1px solid transparent;
+}
+
+.badge-success {
+    background-color: rgba(16, 185, 129, 0.12);
+    color: var(--success);
+    border-color: rgba(16, 185, 129, 0.25);
+}
+
+.badge-warning {
+    background-color: rgba(245, 158, 11, 0.12);
+    color: var(--warning);
+    border-color: rgba(245, 158, 11, 0.25);
+}
+
+.badge-danger {
+    background-color: rgba(239, 68, 68, 0.12);
+    color: var(--danger);
+    border-color: rgba(239, 68, 68, 0.25);
+}
+
+.focus-badge-btn {
+    background-color: rgba(255, 255, 255, 0.07);
+    border: 1px solid var(--panel-border);
+    color: var(--text-main);
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.focus-badge-btn:active {
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+/* --- Section 2: Controls Panel --- */
+.controls-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.panel {
+    background-color: var(--panel-bg);
+    border: 1px solid var(--panel-border);
+    border-radius: 20px;
+    padding: 20px;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* Format Toggle Pill Switcher */
+.format-toggle-container {
+    display: flex;
+    background-color: var(--input-bg);
+    border-radius: 12px;
+    padding: 4px;
+    border: 1px solid var(--panel-border);
+}
+
+.format-pill {
+    flex: 1;
+    background: none;
+    border: none;
+    outline: none;
+    color: var(--text-muted);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 10px 0;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    text-align: center;
+    touch-action: manipulation;
+}
+
+.format-pill.active {
+    background-color: var(--accent-purple);
+    color: white;
+    box-shadow: 0 4px 12px var(--accent-purple-glow);
+}
+
+/* Text Inputs */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
+}
+
+.form-row {
+    display: flex;
+    gap: 12px;
+    width: 100%;
+}
+
+label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--text-muted);
+}
+
+input[type="text"],
+input[type="number"],
+select {
+    background-color: var(--input-bg);
+    border: 1px solid var(--panel-border);
+    border-radius: 10px;
+    color: var(--text-main);
+    padding: 12px 14px;
+    font-size: 15px; /* 15px or higher prevents iOS Safari auto-zoom on focus */
+    font-family: inherit;
+    width: 100%;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+input[type="text"] {
+    font-family: 'Fira Code', monospace;
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+select:focus {
+    border-color: var(--input-focus-border);
+    background-color: rgba(10, 12, 20, 0.8);
+}
+
+/* --- Section 3: Collapsible Advanced Settings --- */
+.advanced-settings-accordion {
+    background-color: var(--panel-bg);
+    border: 1px solid var(--panel-border);
+    border-radius: 20px;
+    overflow: hidden;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    transition: all 0.3s ease;
+}
+
+.accordion-summary {
+    list-style: none;
+    padding: 16px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    user-select: none;
+}
+
+.accordion-summary span {
+    color: var(--accent-blue);
+    transition: transform 0.3s ease;
+}
+
+.advanced-settings-accordion[open] .accordion-summary span {
+    transform: rotate(45deg);
+}
+
+.accordion-content {
+    padding: 0 20px 20px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    border-top: 1px solid rgba(255,255,255,0.03);
+}
+
+/* Custom Checkbox */
+.checkbox-group {
+    justify-content: flex-end;
+    padding-bottom: 5px;
+}
+
+.checkbox-container {
+    display: flex;
+    align-items: center;
+    position: relative;
+    padding-left: 28px;
+    cursor: pointer;
+    font-size: 13px;
+    user-select: none;
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+.checkbox-container input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+.checkmark {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+    height: 18px;
+    width: 18px;
+    background-color: var(--input-bg);
+    border: 1px solid var(--panel-border);
+    border-radius: 4px;
+}
+
+.checkbox-container input:checked ~ .checkmark {
+    background-color: var(--accent-purple);
+    border-color: var(--accent-purple);
+}
+
+.checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+}
+
+.checkbox-container input:checked ~ .checkmark:after {
+    display: block;
+}
+
+.checkbox-container .checkmark:after {
+    left: 5px;
+    top: 2px;
+    width: 5px;
+    height: 9px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+/* Color Pickers */
+.color-picker-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background-color: var(--input-bg);
+    border: 1px solid var(--panel-border);
+    border-radius: 10px;
+    padding: 8px 12px;
+}
+
+input[type="color"] {
+    -webkit-appearance: none;
+    border: none;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    cursor: pointer;
+    background: none;
+}
+
+input[type="color"]::-webkit-color-swatch {
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 50%;
+}
+
+.color-hex {
+    font-family: 'Fira Code', monospace;
+    font-size: 13px;
+}
+
+/* Range Slider */
+.slider-label-row {
+    display: flex;
+    justify-content: space-between;
+}
+
+.slider-value {
+    font-size: 12px;
+    font-family: 'Fira Code', monospace;
+    color: var(--accent-blue);
+    background-color: var(--accent-blue-glow);
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+input[type="range"] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--input-bg);
+    outline: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--accent-blue);
+    box-shadow: 0 0 8px var(--accent-blue);
+    cursor: pointer;
+}
+
+/* --- Section 4: Action Buttons --- */
+.action-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px;
+    border-radius: 12px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    outline: none;
+    transition: all 0.2s ease;
+    touch-action: manipulation;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--accent-purple), #9a3df7);
+    color: white;
+}
+
+.btn-primary:active {
+    transform: scale(0.97);
+}
+
+.btn-secondary {
+    background-color: var(--input-bg);
+    color: var(--text-main);
+    border: 1px solid var(--panel-border);
+}
+
+.btn-secondary:active {
+    background-color: rgba(255,255,255,0.05);
+}
+
+.btn-accent {
+    grid-column: span 2;
+    background: linear-gradient(135deg, var(--accent-blue), #0077ff);
+    color: white;
+}
+
+.btn-accent:active {
+    transform: scale(0.97);
+}
+
+.btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+/* --- Immersive Focus Mode Fullscreen Overlay --- */
+.focus-overlay-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: #ffffff; /* High contrast white background for perfect scanner reading */
+    z-index: 9999;
+    display: none; /* Controlled via JS */
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+/* If focus mode is active, prevent body scrolling */
+body.focus-active {
+    overflow: hidden;
+}
+
+.close-focus-btn {
+    position: absolute;
+    top: max(20px, env(safe-area-inset-top));
+    right: 20px;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    border: none;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    font-size: 20px;
+    font-weight: 300;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.focus-canvas-container {
+    background-color: white;
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    max-width: 90%;
+    max-height: 70%;
+}
+
+#focus-canvas {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+}
+
+.focus-hint {
+    margin-top: 30px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #888888;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* --- Printer Stylesheet --- */
+@media print {
+    body {
+        background: white;
+        color: black;
+        padding: 0;
+    }
+    .app-container, .glass-background, .focus-overlay-screen {
+        display: none !important;
+    }
+}
