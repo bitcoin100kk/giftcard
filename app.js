@@ -38,10 +38,11 @@ const SUBTEXT_HEIGHT = 45;
 // Wallet Data Store
 let savedCards = [];
 
-// Helper: Format Card Numbers in blocks of 4 digits
+// Helper: Format Card Numbers in blocks of 4 characters (alphanumeric supported)
 function formatCardNumber(str) {
-    const clean = str.replace(/\s+/g, "");
-    const matches = clean.match(/\d{1,4}/g);
+    if (!str) return "";
+    const clean = str.toString().replace(/\s+/g, "");
+    const matches = clean.match(/.{1,4}/g);
     return matches ? matches.join(" ") : str;
 }
 
@@ -679,7 +680,7 @@ function renderWalletList() {
 // Populate Generator with Card details
 function loadCardIntoGenerator(card) {
     storeNameInput.value = card.store;
-    cardNumberInput.value = card.card;
+    cardNumberInput.value = formatCardNumber(card.card);
     pinInput.value = card.pin || "";
     
     // Set type input & toggler pills
@@ -716,7 +717,7 @@ function loadCardIntoGenerator(card) {
 
 // Save Current Fields to Wallet
 function saveCurrentCard() {
-    const cardNo = cardNumberInput.value.trim();
+    const cardNo = cardNumberInput.value.trim().replace(/\s+/g, "");
     const pin = pinInput.value.trim();
     let store = storeNameInput.value.trim();
 
@@ -846,6 +847,21 @@ pills.forEach(pill => {
         updateContrastBadge();
         drawCode();
     });
+});
+
+// Auto-format the Card Number input box as the user types
+cardNumberInput.addEventListener("input", (e) => {
+    const cursorPosition = e.target.selectionStart;
+    const originalLength = e.target.value.length;
+    
+    const formatted = formatCardNumber(e.target.value);
+    e.target.value = formatted;
+    
+    const newLength = formatted.length;
+    e.target.setSelectionRange(
+        cursorPosition + (newLength - originalLength),
+        cursorPosition + (newLength - originalLength)
+    );
 });
 
 // Event Listeners for Live Rendering
